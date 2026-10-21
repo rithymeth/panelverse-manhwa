@@ -1,0 +1,2 @@
+import Link from 'next/link';import Navbar from '@/components/Navbar';import Footer from '@/components/Footer';
+export default function NotFound(){return <><Navbar/><main className="not-found"><span>404 / LOST IN THE PANELS</span><h1>This chapter<br/><em>doesn't exist.</em></h1><p>Looks like the page you're searching for slipped into another universe.</p><Link className="btn btn-primary" href="/browse">Discover stories ↗</Link></main><Footer/></>}

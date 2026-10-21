@@ -1,0 +1,16 @@
+services:
+  panelverse:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+      SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET in .env}
+      DATA_DIR: /app/data
+      SEED_DEMO: ${SEED_DEMO:-true}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    volumes:
+      - panelverse-data:/app/data
+    restart: unless-stopped
+volumes:
+  panelverse-data:
