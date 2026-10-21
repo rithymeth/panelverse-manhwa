@@ -15,9 +15,9 @@ async function digest(bytes:Uint8Array):Promise<string>{
   const sha=await crypto.subtle.digest('SHA-256',buffer.buffer);
   return Array.from(new Uint8Array(sha)).map(n=>n.toString(16).padStart(2,'0')).join('');
 }
-async function compact(bytes:Uint8Array):Promise<Blob>{
+async function compact(bytes:Uint8Array,mime='image/png'):Promise<Blob>{
   const b=new Uint8Array(bytes.byteLength);b.set(bytes);
-  const original=new Blob([b.buffer],{type:'image/png'});
+  const original=new Blob([b.buffer],{type:mime});
   if(original.size<=maxImage)return original;
   const bitmap=await createImageBitmap(original);
   try{
@@ -69,22 +69,42 @@ export default function ImportChapter(){
   const [chapterTitle,setChapterTitle]=useState('');
   const [token,setToken]=useState('');
   const [file,setFile]=useState<File|null>(null);
+  const [mode,setMode]=useState<'zip'|'images'>('zip');
+  const [imageFiles,setImageFiles]=useState<File[]>([]);
   const [review,setReview]=useState(false);
   const [loading,setLoading]=useState(false);
   const [message,setMessage]=useState('');
   const [chapterUrl,setChapterUrl]=useState('');
   async function publish(){
-    if(!file||!title.trim()||!review||token.length<32){setMessage('Select an approved ZIP, enter your story title and private token, and confirm review.');return;}
+    if((mode==='zip'&&!file)||(mode==='images'&&!imageFiles.length)||!title.trim()||!review||token.length<32){setMessage('Choose chapter artwork, enter your title and private token, and confirm your review.');return;}
     const chapterNumber=Number(number);
     if(!Number.isSafeInteger(chapterNumber)||chapterNumber<1||chapterNumber>9999){setMessage('Enter a valid chapter number.');return;}
     setLoading(true);setChapterUrl('');
     try{
-      setMessage('Checking ZIP integrity and human review proof...');
-      const {manifest,images}=await readArchive(file);
+      let images:Uint8Array[]=[];
+      let mimes:string[]=[];
+      let totalPanels=0;
+      if(mode==='zip'){
+        if(!file)throw new Error('Select an approved ZIP');
+        setMessage('Checking ZIP integrity and human review proof...');
+        const bundle=await readArchive(file);
+        images=bundle.images;
+        mimes=images.map(()=>'image/png');
+        totalPanels=bundle.manifest.total_panels||0;
+      }else{
+        if(imageFiles.length>300)throw new Error('Limit is 300 images per chapter');
+        const files=[...imageFiles].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));
+        for(const picture of files){
+          if(!['image/png','image/jpeg','image/webp'].includes(picture.type))throw new Error('Only PNG, JPEG and WebP pages are supported');
+          if(picture.size>25*1024*1024)throw new Error('Each original page must be 25 MB or less');
+          const data=new Uint8Array(await picture.arrayBuffer());
+          images.push(data);mimes.push(picture.type);
+        }
+      }
       const pages:string[]=[];
       for(let i=0;i<images.length;i++){
         setMessage('Uploading verified image '+(i+1)+' of '+images.length+'...');
-        const body=await compact(images[i]);
+        const body=await compact(images[i],mimes[i]);
         const response=await fetch('/api/integrations/manhwa/assets',{
           method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':body.type},body
         });
@@ -95,7 +115,7 @@ export default function ImportChapter(){
       setMessage('Publishing chapter metadata...');
       const response=await fetch('/api/integrations/manhwa/publish',{
         method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
-        body:JSON.stringify({reviewApproved:true,series:{slug:slug.trim().toLowerCase()||title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''),title},chapter:{number:chapterNumber,title:chapterTitle||'Chapter '+chapterNumber,panelCount:manifest.total_panels,pages}})
+        body:JSON.stringify({reviewApproved:true,series:{slug:slug.trim().toLowerCase()||title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''),title},chapter:{number:chapterNumber,title:chapterTitle||'Chapter '+chapterNumber,panelCount:totalPanels,pages}})
       });
       const data=await response.json();
       if(!response.ok||!data.ok)throw new Error('Chapter publication failed: '+(data.error||response.status));
@@ -111,7 +131,7 @@ export default function ImportChapter(){
       <Link href="/" style={{color:'#c7a7ff',textDecoration:'none'}}>← Back to Panelverse</Link>
       <p style={{color:'#bc8cff',letterSpacing:2,fontSize:12,marginTop:36}}>CREATOR TOOLS</p>
       <h1 style={{fontSize:38,margin:'10px 0 14px'}}>Publish a reviewed chapter</h1>
-      <p style={{lineHeight:1.65,color:'#bab9c4'}}>No separate hosting needed. Select a human-reviewed <strong>Manhwa Artist Coworker v15 ZIP</strong>; Panelverse verifies its review record, uploads images in order, and makes your chapter available to readers. Your publishing token is kept in this page's memory only, not saved to the browser.</p>
+      <p style={{lineHeight:1.65,color:'#bab9c4'}}>No separate hosting needed. Upload either a human-reviewed <strong>Manhwa Artist Coworker ZIP</strong> or individually selected images. For reviewed ZIPs, Panelverse checks the review evidence; for images, you must manually inspect the pages and confirm they are ready. Your publishing token is kept in this page's memory only, not saved to the browser.</p>
       <div style={{display:'grid',gap:20,marginTop:30}}>
         <label style={labelStyle}>Series title<input style={inputStyle} value={title} onChange={e=>setTitle(e.target.value)} placeholder="The Whispering Tower" maxLength={150}/></label>
         <label style={labelStyle}>Series slug (optional)<input style={inputStyle} value={slug} onChange={e=>setSlug(e.target.value)} placeholder="the-whispering-tower"/></label>
@@ -119,7 +139,15 @@ export default function ImportChapter(){
           <label style={labelStyle}>Chapter number<input style={inputStyle} type="number" min="1" max="9999" value={number} onChange={e=>setNumber(e.target.value)}/></label>
           <label style={labelStyle}>Chapter title<input style={inputStyle} value={chapterTitle} onChange={e=>setChapterTitle(e.target.value)} placeholder="Chapter 1" maxLength={150}/></label>
         </div>
-        <label style={labelStyle}>Reviewed chapter ZIP<input style={inputStyle} type="file" accept=".zip,application/zip" onChange={e=>setFile(e.target.files?.[0]||null)}/></label>
+        <label style={labelStyle}>Artwork format
+          <select style={inputStyle} value={mode} onChange={e=>setMode(e.target.value==='images'?'images':'zip')}>
+            <option value="zip">Manhwa Artist Coworker reviewed ZIP</option>
+            <option value="images">Individual PNG/JPEG/WebP images</option>
+          </select>
+        </label>
+        {mode==='zip'
+          ?<label style={labelStyle}>Reviewed chapter ZIP<input style={inputStyle} type="file" accept=".zip,application/zip" onChange={e=>setFile(e.target.files?.[0]||null)}/></label>
+          :<label style={labelStyle}>Chapter images (up to 300, numbered in reading order)<input style={inputStyle} multiple type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>setImageFiles(Array.from(e.target.files||[]))}/></label>}
         <label style={labelStyle}>Private Panelverse publish token<input style={inputStyle} type="password" autoComplete="off" value={token} onChange={e=>setToken(e.target.value)} placeholder="Token stored in Vercel" /></label>
         <label style={{display:'flex',gap:12,alignItems:'start',fontSize:14,lineHeight:1.45}}>
           <input type="checkbox" checked={review} onChange={e=>setReview(e.target.checked)} style={{marginTop:4}}/>
