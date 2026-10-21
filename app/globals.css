@@ -14,3 +14,30 @@
 .nav-links a{display:inline-flex;align-items:center;gap:7px}
 @media(max-width:900px){.pv-coworker-promo{padding:65px 0}.pv-coworker-promo-grid{grid-template-columns:1fr;gap:35px}.pv-coworker-promo-art{min-height:320px;order:2}.pv-coworker-promo-copy{order:1}}
 @media(max-width:650px){.pv-coworker-promo{padding:55px 0}.pv-coworker-promo-art{min-height:275px}.pv-promo-board{padding:17px}.pv-promo-board-line{font-size:14px}.pv-promo-card-row>div{min-height:75px;font-size:9px}.pv-coworker-promo-copy h2{font-size:42px}}
+
+
+/* Responsive mobile navigation */
+.pv-mobile-toggle,.pv-mobile-backdrop,.pv-mobile-menu{display:none}
+@media(max-width:900px){
+ .site-header{z-index:60}
+ .pv-mobile-toggle{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;flex-shrink:0;background:#231c30;color:#f8f4ff;border:1px solid #655576;border-radius:11px}
+ .pv-mobile-toggle:hover,.pv-mobile-toggle[aria-expanded="true"]{background:#38294f;border-color:#b7a2ff}
+ .pv-mobile-toggle:focus-visible,.pv-mobile-menu a:focus-visible{outline:2px solid #d6c6ff;outline-offset:3px}
+ .pv-mobile-menu{display:grid;position:absolute;z-index:80;top:calc(100% + 8px);left:21px;right:21px;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:16px;border:1px solid #5b4970;border-radius:17px;max-height:calc(100dvh - 98px);overflow-y:auto;background:#1a1624;box-shadow:0 22px 65px #000c}
+ .pv-mobile-menu a{display:flex;align-items:center;min-height:49px;padding:13px 15px;border-radius:10px;font-size:14px;font-weight:700;color:#e7ddf3;background:#262033}
+ .pv-mobile-menu a:hover,.pv-mobile-menu a:focus-visible{background:#3b2d52;color:#fff}
+ .pv-mobile-backdrop{display:block;position:fixed;z-index:70;inset:72px 0 0;width:100%;height:calc(100dvh - 72px);border:0;background:#05040bcc;backdrop-filter:blur(4px);padding:0}
+}
+@media(max-width:650px){
+ .header-right{gap:8px}
+ .header-right .pv-publish-link{display:none}
+ .header-right .search-link{min-width:0;width:40px;height:40px;padding:9px;justify-content:center}
+ .pv-mobile-menu{left:16px;right:16px;grid-template-columns:minmax(0,1fr);gap:5px;padding:12px}
+ .pv-mobile-menu a{min-height:46px}
+}
+@media(max-width:360px){
+ .site-header .brand{font-size:18px;gap:8px}
+ .site-header .brand small{font-size:7px}
+ .header-right{gap:5px}
+ .pv-mobile-toggle{width:39px;height:39px}
+}
