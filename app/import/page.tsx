@@ -132,6 +132,11 @@ export default function ImportChapter(){
     if((mode==='zip'&&!file)||(mode==='images'&&!imageFiles.length)||!title.trim()||!review||token.length<32){setMessage('Choose chapter artwork, enter your title and private token, and confirm your review.');return;}
     const chapterNumber=Number(number);
     if(!Number.isSafeInteger(chapterNumber)||chapterNumber<1||chapterNumber>9999){setMessage('Enter a valid chapter number.');return;}
+    const destinationSlug=slug.trim().toLowerCase()||title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(destinationSlug)){setMessage('Enter a valid series slug (lowercase words separated by hyphens).');return;}
+    const selectedName=mode==='zip'?(file?.name||'chapter ZIP'):(imageFiles.length+' chapter images');
+    const confirmation='Publishing destination:\n'+title+'\nSeries slug: '+destinationSlug+'\nChapter: '+chapterNumber+'\nSource: '+selectedName+'\n\nIMPORTANT: If this chapter number already exists under this series slug, publishing REPLACES its online artwork and metadata.\n\nIs this the correct series and chapter?';
+    if(!window.confirm(confirmation))return;
     setLoading(true);setChapterUrl('');
     try{
       let images:Uint8Array[]=[];
@@ -212,6 +217,7 @@ export default function ImportChapter(){
       </div>
       {message&&<p role="status" style={{padding:15,borderRadius:10,marginTop:20,background:'#1e202a',lineHeight:1.5}}>{message}</p>}
       {chapterUrl&&<Link href={chapterUrl} style={{color:'#cbacff',display:'block',marginTop:16,fontWeight:700}}>Open published chapter →</Link>}
+      <p style={{fontSize:12,color:'#dcb5a7',lineHeight:1.6}}>Check the series slug and chapter number carefully before publishing. An existing chapter with the same slug and number will be replaced.</p>
       <p style={{fontSize:12,lineHeight:1.6,color:'#9694a1',marginTop:35}}>Only use this page on the official Panelverse domain. Do not share your publish token. For completely automatic local publishing, use the optional folder watcher included in Manhwa Artist Coworker v16.0.2.</p>
     </div>
   </main>;
