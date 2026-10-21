@@ -2,7 +2,9 @@ import Database from 'better-sqlite3';
 import fs from 'node:fs';
 import path from 'node:path';
 import type { Series, Chapter, Page } from './types';
-const dir = path.resolve(process.env.DATA_DIR || './data');
+// Vercel functions can only write to /tmp; this is an ephemeral demo catalog,
+// NOT durable publishing storage. Self-hosted deployments should set DATA_DIR to a persistent volume.
+const dir = path.resolve(process.env.DATA_DIR || (process.env.VERCEL ? '/tmp/panelverse' : './data'));
 let instance: Database.Database | null = null;
 export function dataDir() { return dir; }
 function initialize(db: Database.Database) {
