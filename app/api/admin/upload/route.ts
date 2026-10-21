@@ -19,7 +19,7 @@ export async function POST(req:NextRequest){if(!requestIsAdmin(req))return unaut
    if(files.reduce((total,file)=>total+file.size,0)>70*1024*1024)return Response.json({error:'Batch exceeds the 70MB limit. Upload in smaller groups.'},{status:413});
    files.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));
    // Write files first, commit their page records as a single transaction.
-   const saved=[];for(const file of files)saved.push(await saveImage(file,'chapters'));
+   const saved: Awaited<ReturnType<typeof saveImage>>[] = []; for (const file of files) saved.push(await saveImage(file,'chapters'));
    const last=(db.prepare('SELECT COALESCE(MAX(position),0) as n FROM pages WHERE chapter_id=?').get(id) as {n:number}).n;
    const insert=db.prepare('INSERT INTO pages (id,chapter_id,position,image) VALUES (?,?,?,?)');db.transaction(()=>saved.forEach((asset,i)=>insert.run(randomUUID(),id,last+i+1,asset.url)))();
    return Response.json({ok:true,added:saved.length});
