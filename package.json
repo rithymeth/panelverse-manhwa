@@ -17,7 +17,8 @@
     "react-dom": "^19.1.0",
     "better-sqlite3": "^12.2.0",
     "lucide-react": "^0.468.0",
-    "@vercel/blob": "^1.1.1"
+    "@vercel/blob": "^1.1.1",
+    "jszip": "^3.10.1"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
