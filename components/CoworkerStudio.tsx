@@ -73,8 +73,11 @@ export default function CoworkerStudio(){
   setPublishing(true);setStatus('Preparing your reviewed chapter…');setPublishedLink('');
   try{
    const urls:string[]=[];
-   for(let i=0;i<files.length;i++){
-    setStatus(`Uploading panel ${i+1} of ${files.length} — ${Math.round(i/files.length*100)}%`);
+   for(let i=0;i<draft.panels.length;i++){
+    const panel=draft.panels[i];
+    if(!files[i]&&generated[panel.id]){urls.push(generated[panel.id]);continue;}
+    if(!files[i])throw new Error('Missing artwork for panel '+panel.id);
+    setStatus(`Uploading manually selected image ${i+1} of ${draft.panels.length}...`);
     const body=await optimizeImage(files[i].file);
     const response=await fetch('/api/integrations/manhwa/assets',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':body.type},body});
     const data=await response.json().catch(()=>({}));
