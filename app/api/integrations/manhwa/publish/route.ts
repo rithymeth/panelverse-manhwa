@@ -47,7 +47,12 @@ export async function POST(req:NextRequest){
     publication.chapter.title=previous.chapter.title;
    if(!publication.chapter.panelCount)publication.chapter.panelCount=previous.chapter.panelCount;
   }
+  // The existing series may use a cover from its older chapter. Keep that cover
+  // unless replacing its source image; otherwise update the cover to the new first page.
+  const preservedCover=mode==='replace'&&previous&&!previous.chapter.pages.includes(previous.series.cover)?previous.series.cover:'';
+  if(mode==='replace')publication.series.cover=publication.chapter.pages[0];
   await validatePages(publication);
+  if(preservedCover)publication.series.cover=preservedCover;
   // Re-check the chapter version after verifying uploaded image assets.
   if(mode==='replace'){
    const latest=await getPublishedChapter(publication.series.slug,publication.chapter.number);
