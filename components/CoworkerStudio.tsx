@@ -12,6 +12,7 @@ const storeKey='panelverse:coworker:draft:v1';
 const artStoreKey='panelverse:coworker:generated:v1';
 const shots=['Establishing wide shot','Medium cinematic shot','Expressive close-up','Low-angle dramatic composition','Over-the-shoulder conversation','Atmospheric environmental detail','Dynamic action framing','Intimate reaction shot'];
 const moods=['Quiet anticipation','Subtle tension','Warm connection','Discovery and wonder','High emotional impact','A cinematic transition'];
+const beatsOfMotion=['Establish the spatial geography, weather and lighting','Introduce the protagonist entering the scene','Show a small gesture that advances the action','Reveal a meaningful object or location detail','Capture a reaction to the newest information','Shift the viewpoint to the supporting cast or environment','Advance the physical action with a distinct pose','Use a quiet pause or expressive glance','Reveal a new consequence of the scene','End this portion on a visually clear transition'];
 const starting:Draft={title:'',slug:'',genre:'Fantasy',chapterTitle:'The Beginning',chapter:1,outline:'A new world appears beyond the morning fog.\nThe hero senses an unfamiliar presence.\nAn unexpected discovery changes everything.\nThe chapter ends on a compelling revelation.',artStyle:'Full-color Korean vertical webtoon, expressive cinematic lighting, beautifully detailed backgrounds, consistent anime-inspired character designs',characters:'',panelCount:30,panels:[]};
 const toSlug=(s:string)=>s.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,80);
 const sortNumeric=(a:File,b:File)=>a.name.localeCompare(b.name,undefined,{numeric:true});
@@ -20,8 +21,8 @@ function buildPanels(d:Draft):Panel[]{
  const safe=beats.length?beats:['Introduce the setting','Establish the main character','Reveal a turning point','End on a cliffhanger'];
  return Array.from({length:d.panelCount},(_,i)=>{
   const index=Math.min(safe.length-1,Math.floor(i*safe.length/d.panelCount));
-  const beat=safe[index];const shot=shots[i%shots.length];
-  return {id:i+1,beat,shot,prompt:[d.artStyle,'Vertical full-color webtoon panel.','Scene: '+beat+'.','Shot: '+shot+'.','Mood: '+moods[i%moods.length]+'.',d.characters?'Character consistency reference: '+d.characters+'.':'Keep the recurring cast consistent.','Crisp linework, expressive poses, legible composition; no dialogue rendered into the art.'].join(' '),dialogue:''};
+  const beat=safe[index];const shot=shots[i%shots.length];const moment=beatsOfMotion[i%beatsOfMotion.length];
+  return {id:i+1,beat,shot,prompt:[d.artStyle,'Vertical full-color webtoon panel.','Scene: '+beat+'.','Shot: '+shot+'.','Mood: '+moods[i%moods.length]+'.','Distinct story progression: '+moment+'.','Frame '+(i+1)+' of '+d.panelCount+'; do not repeat the previous panel composition.',d.characters?'Character consistency reference: '+d.characters+'.':'Keep the recurring cast consistent.','Crisp linework, expressive poses, legible composition; no dialogue rendered into the art.'].join(' '),dialogue:''};
  });
 }
 function saveFile(name:string,body:string,mime:string){const blob=new Blob([body],{type:mime});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=name;link.click();URL.revokeObjectURL(url);}
