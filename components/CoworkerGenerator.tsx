@@ -5,8 +5,8 @@ import {AlertCircle,CheckCircle2,ImagePlus,LockKeyhole,RefreshCw,Square,Play,Wan
 
 type Panel={id:number;prompt:string;shot:string;beat:string;dialogue:string};
 type Config={authenticated:boolean;configured:boolean;model:string};
-type Props={panels:Panel[];generated:Record<number,string>;slug:string;chapter:number;onGenerated:(panelId:number,url:string)=>void};
-export default function CoworkerGenerator({panels,generated,slug,chapter,onGenerated}:Props){
+type Props={panels:Panel[];generated:Record<number,string>;slug:string;chapter:number;selectedId:number;onGenerated:(panelId:number,url:string)=>void};
+export default function CoworkerGenerator({panels,generated,slug,chapter,selectedId,onGenerated}:Props){
  const [config,setConfig]=useState<Config|null>(null);
  const [checking,setChecking]=useState(true);
  const [running,setRunning]=useState(false);
@@ -61,7 +61,7 @@ export default function CoworkerGenerator({panels,generated,slug,chapter,onGener
    <div className="cw-generator-info"><AlertCircle size={19}/><div><strong>Connect an image-generation API key</strong><p>Add <code>OPENAI_API_KEY</code> as an encrypted Production environment variable in Vercel, then redeploy. Your ChatGPT subscription is separate from API billing.</p><a href="https://vercel.com/rithymeths-projects/panelverse-manhwa/settings/environment-variables" target="_blank" rel="noopener noreferrer">Open Vercel settings ↗</a></div><button type="button" onClick={check}><RefreshCw size={16}/> Check again</button></div>
    :<div className="cw-generator-info cw-generator-connected"><CheckCircle2 size={19}/><div><strong>Image model connected: {config.model}</strong><p>Each generated image is a separate API request. Generate a small sample first; review faces and outfits for consistency before generating the full chapter.</p></div></div>}
   <div className="cw-generator-controls">
-   <button type="button" disabled={running||!config?.configured||!panels.length} onClick={()=>void generate('one',1)}><ImagePlus size={16}/> {generated[1]?'Regenerate panel 1':'Generate first panel'}</button>
+   <button type="button" disabled={running||!config?.configured||!panels.length} onClick={()=>void generate('one',selectedId)}><ImagePlus size={16}/> {generated[selectedId]?'Regenerate panel '+selectedId:'Generate panel '+selectedId}</button>
    <button type="button" disabled={running||!config?.configured||done===panels.length} onClick={()=>void generate('five')}><Play size={16}/> Next 5 missing</button>
    <button className="cw-generator-all" type="button" disabled={running||!config?.configured||done===panels.length} onClick={()=>void generate('remaining')}><WandSparkles size={17}/> Generate all missing ({panels.length-done})</button>
    {running&&<button type="button" className="cw-generator-stop" onClick={()=>{stopRef.current=true;setMessage('Stopping after the current panel...');}}><Square size={15}/> Stop after current</button>}
