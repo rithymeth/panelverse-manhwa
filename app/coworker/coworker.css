@@ -59,3 +59,22 @@
 .cw-generator-foot{font-size:10px;line-height:1.7;color:#988ca9;margin:15px 0 0}
 @media(max-width:760px){.cw-generator{padding:20px 16px}.cw-generator-title{display:block}.cw-generator-count{display:inline-block;margin-top:14px}.cw-generator-info{flex-wrap:wrap}.cw-generator-info button{margin-left:32px}.cw-generator-controls button{width:100%}.cw-generator-title h3{font-size:24px}}
 @media(prefers-reduced-motion:reduce){.cw-pulse{animation:none}}
+
+
+/* v2 review screen: AI generation first, optional manual upload */
+.cw-artwork-progress{display:grid;gap:10px;padding:21px 22px;background:linear-gradient(135deg,#2d1f3d,#1d1728);border:1px solid #6e5685;border-radius:13px}
+.cw-artwork-label{display:block;font-size:9px;font-weight:900;letter-spacing:.19em;color:#bda5ea;margin-bottom:9px}
+.cw-artwork-progress strong{font-size:25px;font-family:Outfit,Arial,sans-serif;color:#f5eaff}
+.cw-artwork-progress p{font-size:12px;line-height:1.7;margin:3px 0 0;color:#b6a8c3}
+.cw-artwork-track{width:100%;height:9px;background:#171223;border-radius:9px;overflow:hidden;border:1px solid #493859}
+.cw-artwork-track>span{display:block;height:100%;background:linear-gradient(90deg,#946bdc,#b3e9bc);transition:width .3s ease}
+.cw-artwork-progress p.cw-artwork-warning{color:#e9c38c;font-size:12px}
+.cw-artwork-progress p.cw-artwork-success{color:#a2e6bf}
+.cw-optional-upload{border:1px solid #40344e;border-radius:12px;background:#171321;overflow:hidden}
+.cw-upload-toggle{border:0;padding:16px 18px;width:100%;background:transparent;color:#cfc0e7;display:flex;align-items:center;gap:12px;text-align:left;font-size:12px;font-weight:800;cursor:pointer}
+.cw-upload-toggle>svg:last-child{margin-left:auto;transition:transform .2s}
+.cw-upload-toggle[aria-expanded=true]>svg:last-child{transform:rotate(90deg)}
+.cw-upload-toggle:hover{background:#282035}
+.cw-optional-upload .cw-upload-zone{border:0;border-top:1px solid #4d3d5e;border-radius:0}
+.cw-review-consent:has(input:disabled){opacity:.65;cursor:not-allowed}
+@media(max-width:650px){.cw-artwork-progress{padding:17px 15px}.cw-artwork-progress strong{font-size:22px}}
