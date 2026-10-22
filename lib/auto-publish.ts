@@ -36,9 +36,32 @@ export async function validatePages(p:Publication){
  if(!p.series.cover)p.series.cover=p.chapter.pages[0];
  else if(!p.series.cover.startsWith('/covers/')&&!p.chapter.pages.includes(p.series.cover))throw new Error('Cover URL not approved');
 }
-export async function storePublication(p:Publication){
- const pathname=prefix+p.series.slug+'/'+String(p.chapter.number).padStart(4,'0')+'.json';
- return (await put(pathname,JSON.stringify(p),{access:'public',contentType:'application/json',addRandomSuffix:false,allowOverwrite:true,cacheControlMaxAge:60})).url;
+export function chapterManifestPath(slug:string,number:number){
+ if(!slugOk(slug)||!Number.isSafeInteger(number)||number<1||number>9999)throw new Error('Invalid chapter destination');
+ return prefix+slug+'/'+String(number).padStart(4,'0')+'.json';
+}
+export async function getPublishedChapter(slug:string,number:number):Promise<Publication|undefined>{
+ const pathname=chapterManifestPath(slug,number);
+ const result=await list({prefix:pathname,limit:10});
+ const item=result.blobs.find(blob=>blob.pathname===pathname);
+ if(!item)return undefined;
+ const response=await fetch(item.url,{cache:'no-store'});
+ if(!response.ok)throw new Error('Could not read existing published chapter');
+ const publication=await response.json() as Publication;
+ if(publication?.schema!==1||publication.series?.slug!==slug||publication.chapter?.number!==number||!Array.isArray(publication.chapter.pages))
+  throw new Error('Existing chapter metadata is invalid; replacement blocked');
+ return publication;
+}
+export async function storePublication(p:Publication,previous?:Publication){
+ const pathname=chapterManifestPath(p.series.slug,p.chapter.number);
+ // Keep the previous manifest for manual recovery without deleting previous page images.
+ let backupUrl:string|undefined;
+ if(previous){
+  const backupPath='manhwa/revisions/'+p.series.slug+'/'+String(p.chapter.number).padStart(4,'0')+'/'+randomUUID()+'.json';
+  backupUrl=(await put(backupPath,JSON.stringify(previous),{access:'public',contentType:'application/json',addRandomSuffix:false})).url;
+ }
+ const url=(await put(pathname,JSON.stringify(p),{access:'public',contentType:'application/json',addRandomSuffix:false,allowOverwrite:true,cacheControlMaxAge:60})).url;
+ return {url,backupUrl};
 }
 let lastSync=0;let inflight:Promise<void>|undefined;
 async function syncFromBlobs(){
