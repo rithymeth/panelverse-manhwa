@@ -41,3 +41,32 @@
  .header-right{gap:5px}
  .pv-mobile-toggle{width:39px;height:39px}
 }
+
+
+/* Save chapter progress and resume from last reading position */
+.pv-continue-banner{background:linear-gradient(105deg,#241831,#171220 65%,#17121b);border-bottom:1px solid #514067}
+.pv-continue-inner{display:flex;gap:20px;align-items:center;padding-top:14px;padding-bottom:14px;min-height:112px}
+.pv-continue-thumb{width:61px;height:82px;flex-shrink:0;overflow:hidden;border:1px solid #715787;border-radius:9px;background:#392849}
+.pv-continue-thumb img{width:100%;height:100%;object-fit:cover;object-position:top}
+.pv-continue-copy{flex:1;min-width:0}
+.pv-continue-copy>span{display:inline-flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.12em;color:#c8b0fb;font-weight:800}
+.pv-continue-copy h2{margin:6px 0;font-family:Outfit,Arial,sans-serif;letter-spacing:-.03em;font-size:22px;color:#f2e9ff}
+.pv-continue-copy p{margin:0;color:#afa2bf;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pv-continue-copy p strong{color:#e4daef}
+.pv-continue-button{white-space:nowrap;padding:15px 20px}
+.pv-reader-library-link{display:inline-flex;align-items:center;gap:7px;color:#d5c6ef;font-size:11px;font-weight:700;padding:8px 10px;border:1px solid #554660;border-radius:8px}
+.pv-reader-library-link:hover{color:white;border-color:#b5a0ff;background:#30263c}
+.pv-reader-resumed{position:fixed;z-index:45;bottom:22px;left:50%;transform:translateX(-50%);max-width:calc(100vw - 22px);min-width:min(520px,calc(100vw - 22px));display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:12px 14px;background:#262033;border:1px solid #a188d3;border-radius:12px;box-shadow:0 18px 50px #000b;color:#f1e8ff;font-size:12px;line-height:1.5}
+.pv-reader-resumed svg{color:#c3a9ff;flex-shrink:0}
+.pv-reader-resumed button{border:0;background:transparent;font-size:12px;font-weight:800;color:#cbb3ff;padding:4px;cursor:pointer}
+.pv-reader-resumed button:hover{text-decoration:underline}
+@media(max-width:750px){
+ .pv-continue-inner{gap:12px;flex-wrap:wrap;padding-top:16px;padding-bottom:16px}
+ .pv-continue-thumb{width:50px;height:70px}
+ .pv-continue-copy{width:calc(100% - 62px)}
+ .pv-continue-copy h2{font-size:18px}
+ .pv-continue-button{width:100%;justify-content:center}
+ .pv-reader-library-link{font-size:0;gap:0;padding:9px}
+ .pv-reader-library-link svg{width:17px}
+ .pv-reader-resumed{bottom:69px;min-width:auto;font-size:11px;gap:7px}
+}
