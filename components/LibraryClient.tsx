@@ -19,7 +19,7 @@ export default function LibraryClient({series}:{series:Series[]}){
  const bySlug=useMemo(()=>new Map(series.map(s=>[s.slug,s])),[series]);
  const savedStories=useMemo(()=>saved.map(slug=>bySlug.get(slug)).filter((s):s is Series=>Boolean(s)),[saved,bySlug]);
  const recentStories=useMemo(()=>recent.map(r=>({story:bySlug.get(r.slug),...r})).filter((r):r is Recent&{story:Series}=>Boolean(r.story)),[recent,bySlug]);
- function clearHistory(){try{localStorage.removeItem(recentKey);setRecent([]);window.dispatchEvent(new Event('panelverse:library-updated'));}catch{}}
+ function clearHistory(){try{localStorage.removeItem(recentKey);localStorage.removeItem('panelverse:last-read:v1');for(let i=localStorage.length-1;i>=0;i--){const key=localStorage.key(i);if(key?.startsWith('panelverse:reading-position:v1:'))localStorage.removeItem(key);}setRecent([]);window.dispatchEvent(new Event('panelverse:library-updated'));}catch{}}
  const selected=tab==='saved'?savedStories.length:recentStories.length;
  return <section className="pv-library container">
    <div className="pv-library-hero"><span className="section-kicker">YOUR PERSONAL READING SPACE</span><h1>Your stories, <em>your shelf.</em></h1><p>Keep a little corner of Panelverse for the worlds you love. Saved titles and reading history stay in this browser—no account needed.</p><div className="pv-library-stats"><span><Bookmark size={17}/> {ready?savedStories.length:'—'} saved stories</span><span><Clock3 size={17}/> {ready?recentStories.length:'—'} recently read</span></div></div>
